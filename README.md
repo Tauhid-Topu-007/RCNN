@@ -1,89 +1,74 @@
-# 🐠 Aquarium Object Detection Dataset Analysis
+# 🐠 Aquarium Object Detection using Faster R-CNN
 
-A comprehensive analysis and visualization project for the Aquarium Object Detection dataset using COCO annotations. This project explores the dataset structure, visualizes bounding boxes with class labels, and provides insights into the aquarium species distribution.
-
----
-
-## 📋 Table of Contents
-
-- [Overview](#-overview)
-- [Features](#-features)
-- [Dataset](#-dataset)
-- [Technology Stack](#-technology-stack)
-- [Installation](#-installation)
-- [Dataset Structure](#-dataset-structure)
-- [Data Analysis](#-data-analysis)
-- [Visualization](#-visualization)
-- [Code Implementation](#-code-implementation)
-- [Results](#-results)
-- [Project Structure](#-project-structure)
-- [Troubleshooting](#-troubleshooting)
-- [License](#-license)
-- [Acknowledgments](#-acknowledgments)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/your-username/aquarium-object-detection/blob/main/aquarium_detection.ipynb)
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-ee4c2c.svg)](https://pytorch.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ---
 
-## 🎯 Overview
+## Overview
 
-This project provides tools and utilities for analyzing the Aquarium Object Detection dataset. It includes functionality for loading COCO-format annotations, visualizing images with bounding boxes and class labels, and exploring the dataset structure without requiring the pycocotools library.
-
----
-
-## ✨ Features
-
-- **Custom COCO Parser**: Parse COCO JSON annotations without external dependencies
-- **Bounding Box Visualization**: Display images with class-labeled bounding boxes
-- **Dataset Statistics**: Analyze class distribution and image counts
-- **Flexible Visualization**: View random or specific images with annotations
-- **No External Dependencies**: Uses only standard Python libraries
-- **Google Colab Support**: Optimized for running in Colab environment
+This project implements an object detection pipeline to identify and classify marine life in aquarium images. Using a Faster R-CNN model with a MobileNetV3 backbone, the system can detect multiple aquatic creatures including fish, jellyfish, penguins, puffins, sharks, and starfish in a single image. The model leverages transfer learning from a pre-trained COCO checkpoint.
 
 ---
 
-## 📊 Dataset
+## Features
 
-### Aquarium Dataset
-
-- **Source**: [Kaggle - Aquarium Dataset](https://www.kaggle.com/datasets/sharansmenon/aquarium-dataset)
-- **Total Images**: 832 (Training, Validation, Test split)
-- **Classes**: 8 marine species
-- **Format**: COCO JSON annotations
-
-### Dataset Classes
-
-| Class ID | Class Name | Supercategory |
-|----------|------------|---------------|
-| 0 | creatures | none |
-| 1 | fish | creatures |
-| 2 | jellyfish | creatures |
-| 3 | penguin | creatures |
-| 4 | puffin | creatures |
-| 5 | shark | creatures |
-| 6 | starfish | creatures |
-| 7 | stingray | creatures |
+- **Data Pipeline**: Custom PyTorch Dataset class handling COCO-format annotations
+- **Augmentation**: Dynamic image transformations using albumentations library
+- **Transfer Learning**: Pre-trained fasterrcnn_mobilenet_v3_large_fpn backbone
+- **Performance Tracking**: Detailed loss logging for each training component
+- **GPU Support**: Optimized for CUDA-enabled GPUs
+- **Visualization**: Side-by-side comparison of original images with predictions
 
 ---
 
-## 🛠️ Technology Stack
+## Dataset
 
-| Category | Technologies |
-|----------|--------------|
-| **Language** | Python 3.7+ |
-| **Data Processing** | JSON, OS |
-| **Image Processing** | PIL/Pillow |
-| **Visualization** | Matplotlib |
-| **Environment** | Google Colab, Jupyter Notebook |
+This project uses the **Aquarium Combined** dataset from Kaggle.
+
+| Attribute | Description |
+|-----------|-------------|
+| Source | [Aquarium Dataset](https://www.kaggle.com/datasets/sharansmenon/aquarium-dataset) |
+| Classes | fish, jellyfish, penguin, puffin, shark, starfish, stingray |
+| Format | COCO JSON format |
+| Splits | Train, Validation, Test |
 
 ---
 
-## 📦 Installation
+## Model Architecture
 
-### Option 1: Google Colab
+The model uses **Faster R-CNN** with a MobileNetV3-Large backbone.
 
-```python
+| Component | Description |
+|-----------|-------------|
+| Backbone | fasterrcnn_mobilenet_v3_large_fpn (pre-trained on COCO) |
+| Custom Head | Replaced predictor to match 7 classes |
+| Total Parameters | ~18.9M |
+| Trainable Parameters | ~18.8M |
+
+---
+
+## Installation
+
+### Prerequisites
+- Python 3.8+
+- CUDA-capable GPU (recommended)
+- Kaggle API key
+
+### Steps
+
+```bash
+# Clone repository
+git clone https://github.com/your-username/aquarium-object-detection.git
+cd aquarium-object-detection
+
 # Install dependencies
-!pip install matplotlib pillow
+pip install -r requirements.txt
 
-# Clone repository or upload notebook
-!git clone <repository-url>
-cd <project-directory>
+# Download dataset
+mkdir ~/.kaggle
+cp kaggle.json ~/.kaggle/
+kaggle datasets download sharansmenon/aquarium-dataset
+unzip aquarium-dataset.zip -d ./data/
