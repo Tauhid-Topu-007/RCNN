@@ -15,60 +15,82 @@ This project implements an object detection pipeline to identify and classify ma
 
 ## Features
 
-- **Data Pipeline**: Custom PyTorch Dataset class handling COCO-format annotations
-- **Augmentation**: Dynamic image transformations using albumentations library
-- **Transfer Learning**: Pre-trained fasterrcnn_mobilenet_v3_large_fpn backbone
-- **Performance Tracking**: Detailed loss logging for each training component
-- **GPU Support**: Optimized for CUDA-enabled GPUs
-- **Visualization**: Side-by-side comparison of original images with predictions
+- Data Pipeline: Custom PyTorch Dataset class handling COCO-format annotations
+- Augmentation: Dynamic image transformations using albumentations library
+- Transfer Learning: Pre-trained fasterrcnn_mobilenet_v3_large_fpn backbone
+- Performance Tracking: Detailed loss logging for each training component
+- GPU Support: Optimized for CUDA-enabled GPUs
+- Visualization: Side-by-side comparison of original images with predictions
 
 ---
 
 ## Dataset
 
-This project uses the **Aquarium Combined** dataset from Kaggle.
+This project uses the Aquarium Combined dataset from Kaggle.
 
-| Attribute | Description |
-|-----------|-------------|
-| Source | [Aquarium Dataset](https://www.kaggle.com/datasets/sharansmenon/aquarium-dataset) |
-| Classes | fish, jellyfish, penguin, puffin, shark, starfish, stingray |
-| Format | COCO JSON format |
-| Splits | Train, Validation, Test |
+Source: Aquarium Dataset
+Classes: fish, jellyfish, penguin, puffin, shark, starfish, stingray
+Format: COCO JSON format
+Splits: Train, Validation, Test
 
 ---
 
 ## Model Architecture
 
-The model uses **Faster R-CNN** with a MobileNetV3-Large backbone.
+The model uses Faster R-CNN with a MobileNetV3-Large backbone.
 
-| Component | Description |
-|-----------|-------------|
-| Backbone | fasterrcnn_mobilenet_v3_large_fpn (pre-trained on COCO) |
-| Custom Head | Replaced predictor to match 7 classes |
-| Total Parameters | ~18.9M |
-| Trainable Parameters | ~18.8M |
+Component: fasterrcnn_mobilenet_v3_large_fpn (pre-trained on COCO)
+Custom Head: Replaced predictor to match 7 classes
+Total Parameters: ~18.9M
+Trainable Parameters: ~18.8M
 
 ---
 
 ## Installation
 
-### Prerequisites
+Prerequisites:
 - Python 3.8+
 - CUDA-capable GPU (recommended)
 - Kaggle API key
 
-### Steps
+Steps:
 
-```bash
-# Clone repository
+Clone repository:
 git clone https://github.com/your-username/aquarium-object-detection.git
 cd aquarium-object-detection
 
-# Install dependencies
+Install dependencies:
 pip install -r requirements.txt
 
-# Download dataset
+Download dataset:
 mkdir ~/.kaggle
 cp kaggle.json ~/.kaggle/
 kaggle datasets download sharansmenon/aquarium-dataset
 unzip aquarium-dataset.zip -d ./data/
+
+---
+
+## Quick Start
+
+```python
+import torch
+from aquarium_detection import *
+
+dataset_path = "./data/Aquarium Combined"
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+train_dataset = AquariumDetection(root=dataset_path, transforms=get_train_transforms())
+
+model = models.detection.fasterrcnn_mobilenet_v3_large_fpn(pretrained=True)
+model.roi_heads.box_predictor = models.detection.faster_rcnn.FastRCNNPredictor(
+    model.roi_heads.box_predictor.cls_score.in_features, 
+    len(train_dataset.coco.cats)
+)
+model.to(device)
+
+train_loader = DataLoader(train_dataset, batch_size=4, shuffle=True, 
+                         collate_fn=lambda x: tuple(zip(*x)))
+optimizer = optim.SGD(model.parameters(), lr=0.005, momentum=0.9, weight_decay=0.0005)
+
+for epoch in range(10):
+    train_one_epoch(model, optimizer, train_loader, device, epoch)
